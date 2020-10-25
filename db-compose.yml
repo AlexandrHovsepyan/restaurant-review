@@ -1,0 +1,58 @@
+version: '3.3'
+services:
+
+  ###########################
+  # fix-mongodb-permissions #
+  ###########################
+  fix-mongodb-permissions:
+    image: bitnami/mongodb:4.2.0
+    container_name: mongodb-permissions
+    user: root
+    command: chown -R 1001:1001 /bitnami
+    volumes:
+      - mongo-data:/bitnami
+
+  ####################
+  # mongo db primary #
+  ####################
+  mongodb:
+    image: bitnami/mongodb:4.2.0
+    container_name: mongodb
+    stop_grace_period: 1s
+    volumes:
+      - mongo-data:/bitnami
+    networks:
+      - database-network
+    ports:
+      - "28888:28888"
+    environment:
+      - MONGODB_PORT_NUMBER=28888
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb
+      - MONGODB_ROOT_PASSWORD=root_pass
+      - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=2
+
+  ###################
+  #   portainer     #
+  ###################
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    stop_grace_period: 1s
+    networks:
+      - database-network
+    ports:
+      - "9000:9000"
+    command: -H unix:///var/run/docker.sock --no-auth
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+networks:
+  database-network:
+    driver : bridge
+  app-network:
+    driver : bridge
+
+volumes:
+  mongo-data:
+  portainer_data:

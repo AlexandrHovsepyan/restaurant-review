@@ -1,0 +1,52 @@
+version: '3.7'
+services:
+
+  ################
+  # User service #
+  ################
+  user-service:
+    build:
+      context: "./user-service"
+      dockerfile: "Dockerfile"
+    container_name: user-service
+    environment:
+      - mongo_uri=mongodb://root:root_pass@mongodb:28888/user_service?authSource=admin
+      - app_server_port=5000
+      - service_menu_host=http://restaurant-service:5000
+    ports:
+      - "3001:3001"
+      - "5001:5000"
+    volumes:
+      - ./user-service/dist:/home/app
+    networks:
+      - database-network
+      - app-network
+
+  ######################
+  # Restaurant service #
+  ######################
+  restaurant-service:
+    build:
+      context: "./restaurant-service"
+      dockerfile: "Dockerfile"
+    container_name: restaurant-service
+    environment:
+      - mongo_uri=mongodb://root:root_pass@mongodb:28888/restaurant_service?authSource=admin
+      - app_server_port=5000
+      - service_user_host=http://user-service:5000
+    ports:
+      - "3002:3002"
+      - "5002:5000"
+    volumes:
+      - ./restaurant-service/dist:/home/app
+    networks:
+      - database-network
+      - app-network
+    depends_on:
+      - user-service
+
+networks:
+  database-network:
+    driver : bridge
+  app-network:
+    driver : bridge

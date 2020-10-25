@@ -1,0 +1,7 @@
+{
+    "mongo": {
+        "localUri": "mongodb://127.0.0.1:27017/RestaurantReview",
+        "dockerUri": "mongodb://root:root_pass@mongodb:28888/user_service?authSource=admin",
+        "localPort": "27017"
+    }
+}
